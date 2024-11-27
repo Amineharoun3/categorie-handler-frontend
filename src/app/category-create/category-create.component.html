@@ -1,0 +1,45 @@
+<div class="container mt-4">
+    <h2>Ajouter une catégorie</h2>
+    <form (ngSubmit)="addCategory()" class="mb-4">
+
+<div class="form-group">
+    <label for="categoryName">Nom de la catégorie</label>
+    <input 
+        type="text" 
+        id="categoryName" 
+        [(ngModel)]="newCategory.name" 
+        name="name" 
+        class="form-control" 
+        required 
+        placeholder="Nom de la catégorie" />
+</div>
+
+<div class="form-group">
+    <label for="parentCategory">Catégorie Parent</label>
+    <select 
+        id="parentCategory" 
+        [(ngModel)]="newCategory.parentCategory" 
+        name="parent" 
+        class="form-control">
+        <option [ngValue]="null">Aucune</option>
+        <option *ngFor="let category of categories" [ngValue]="category">
+            {{ category.name }}
+        </option>
+    </select>
+
+    </div>
+    <div class="form-group">
+     <label for="createdDate">Date de Création</label>
+    <input
+        type="date"
+        id="createdDate"
+        [(ngModel)]="newCategory.createdDate"
+        name="createdDate"
+        class="form-control"
+    />
+</div>
+
+<button type="submit" class="btn btn-primary mt-3">Ajouter Catégorie</button>
+
+</form>
+</div>

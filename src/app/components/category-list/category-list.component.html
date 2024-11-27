@@ -1,0 +1,106 @@
+<div class="container mt-4">
+  <h2>Liste des Catégories</h2>
+  <ul class="list-group">
+    <!-- Boucle sur les catégories racines -->
+    <ng-container *ngFor="let category of getRootCategories()">
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+          <!-- Affichage du nom de la catégorie ou champ de saisie -->
+          <span *ngIf="editCategory?.id !== category.id">{{ category.name }}</span>
+          <input 
+            *ngIf="editCategory?.id === category.id" 
+            [(ngModel)]="editCategory!.name" 
+            class="form-control me-3" 
+            placeholder="Modifier le nom" />
+
+          <!-- Sélecteur pour changer la catégorie parent -->
+          <select 
+            *ngIf="editCategory?.id === category.id" 
+            [(ngModel)]="editCategory!.parentCategory" 
+            class="form-control mt-2">
+            <option [ngValue]="null">Aucune</option>
+            <option *ngFor="let category of categories" [ngValue]="category">
+              {{ category.name }}
+            </option>
+          </select>
+
+          <div>
+            <!-- Composant UpdateButton -->
+            <app-update-button-component 
+              [isEditing]="editCategory?.id === category.id"
+              (edit)="startEdit(category)"
+              (save)="updateCategory()"
+              (cancel)="cancelEdit()">
+            </app-update-button-component>
+
+            <!-- Composant DeleteButton -->
+            <app-delete-button-component 
+              [categoryId]="category.id || 0"
+              (delete)="deleteCategory($event)">
+            </app-delete-button-component>
+          </div>
+        </div>
+
+        <!-- Afficher les enfants -->
+        <ul class="list-group mt-2">
+          <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: category.children }"></ng-container>
+        </ul>
+      </li>
+    </ng-container>
+  </ul>
+
+  <!-- Message si aucune catégorie disponible -->
+  <p *ngIf="categories.length === 0" class="alert alert-info mt-4">Aucune catégorie disponible.</p>
+
+  <!-- Template récursif pour gérer les sous-catégories -->
+  <ng-template #recursiveList let-children>
+    <ng-container *ngFor="let child of children">
+      <li class="list-group-item ms-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <!-- Affichage du nom de la sous-catégorie ou champ de saisie -->
+          <span *ngIf="editCategory?.id !== child.id">{{ child.name }}</span>
+          <input 
+            *ngIf="editCategory && editCategory.id === child.id" 
+            [(ngModel)]="editCategory.name" 
+            class="form-control me-3" 
+            placeholder="Modifier le nom" />
+
+          <!-- Sélecteur pour changer la catégorie parent -->
+          <select 
+            *ngIf="editCategory?.id === child.id" 
+            [(ngModel)]="editCategory!.parentCategory" 
+            class="form-control mt-2">
+            <option [ngValue]="null">Aucune</option>
+            <option *ngFor="let category of categories" [ngValue]="category">
+              {{ category.name }}
+            </option>
+          </select>
+
+          <div>
+            <!-- Composant UpdateButton -->
+            <app-update-button-component 
+              [isEditing]="editCategory?.id === child.id"
+              (edit)="startEdit(child)"
+              (save)="updateCategory()"
+              (cancel)="cancelEdit()">
+            </app-update-button-component>
+
+            <!-- Composant DeleteButton -->
+            <app-delete-button-component 
+              [categoryId]="child.id || 0"
+              (delete)="deleteCategory($event)">
+            </app-delete-button-component>
+          </div>
+        </div>
+
+        <!-- Appel récursif pour les sous-enfants -->
+        <ul class="list-group mt-2">
+          <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: child.children }"></ng-container>
+        </ul>
+      </li>
+    </ng-container>
+    
+  </ng-template>
+</div>
+<app-category-pagination></app-category-pagination>
+<app-category-filter></app-category-filter>

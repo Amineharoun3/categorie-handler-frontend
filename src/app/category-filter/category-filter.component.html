@@ -1,0 +1,24 @@
+<form (submit)="applyFilters()">
+  <label>
+    <input type="checkbox" [(ngModel)]="isRoot" name="isRoot" />
+    Racine uniquement
+  </label>
+
+  <label>
+    Après le :
+    <input type="date" [(ngModel)]="afterDate" name="afterDate" />
+  </label>
+
+  <label>
+    Avant le :
+    <input type="date" [(ngModel)]="beforeDate" name="beforeDate" />
+  </label>
+
+  <button type="submit">Appliquer les filtres</button>
+</form>
+
+<ul>
+  <li *ngFor="let category of filteredCategories">
+    {{ category.name }}
+  </li>
+</ul>
