@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  front:
+    container_name: angular-client
+    build: .
+    ports:
+      - '4200:4200' 
+    volumes:
+      - .:/app  # Synchronisation des fichiers locaux avec le conteneur
+      - /app/node_modules  # Ignorer les node_modules locaux pour éviter les conflits
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Pour résoudre les problèmes de reload
+    stdin_open: true
+    restart: always

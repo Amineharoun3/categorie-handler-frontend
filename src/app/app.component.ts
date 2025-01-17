@@ -7,4 +7,15 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'Categorie_handler';
+
+    // Ajoutez cette méthode
+    isCreateFormVisible: boolean = false;
+
+    showCreateCategoryForm() {
+      this.isCreateFormVisible = true;
+    }
+  
+    hideCreateCategoryForm() {
+      this.isCreateFormVisible = false;
+    }
 }

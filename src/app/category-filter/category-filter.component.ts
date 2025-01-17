@@ -18,26 +18,33 @@ export class CategoryFilterComponent {
   applyFilters(): void {
     this.categoryService.getAllCategories().subscribe((categories: Category[]) => {
       this.filteredCategories = categories.filter((category) => {
-        const createdDate = new Date(category.createdDate as string | number);
-
-
+        const createdDate = typeof category.createdDate === 'string' || typeof category.createdDate === 'number'
+          ? new Date(category.createdDate)
+          : null;
+  
+        // Vérifier si `createdDate` est null
+        if (!createdDate) {
+          return false; // Exclure les catégories sans date valide
+        }
+  
         // Filtrer par catégories racines
         if (this.isRoot && category.parentCategory !== null) {
           return false;
         }
-
+  
         // Filtrer par date "après"
         if (this.afterDate && createdDate < new Date(this.afterDate)) {
           return false;
         }
-
+  
         // Filtrer par date "avant"
         if (this.beforeDate && createdDate > new Date(this.beforeDate)) {
           return false;
         }
-
+  
         return true;
       });
     });
   }
+  
 }
