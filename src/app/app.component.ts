@@ -18,4 +18,11 @@ export class AppComponent {
     hideCreateCategoryForm() {
       this.isCreateFormVisible = false;
     }
+
+  // Affiche uniquement la liste des catégories
+  showHome(): void {
+    this.isCreateFormVisible = false;
+  }
+
+  
 }

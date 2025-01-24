@@ -63,16 +63,29 @@ beforeDate: string | null = null;
     return this.categories.filter(category => !category.parentCategory);
   }
   
-  deleteCategory(id: number | null): void {
-    if (id !== null) {
-      this.categoryService.deleteCategory(id).subscribe(
-        () => {
-          this.categories = this.categories.filter(c => c.id !== id); // Supprime la catégorie de la liste
-        },
-        (error) => console.error('Erreur lors de la suppression de la catégorie', error)
-      );
+deleteCategory(id: number | null): void {
+  if (id !== null) {
+    this.categoryService.deleteCategory(id).subscribe(
+      () => {
+        // Trouver et supprimer la catégorie de la liste
+        this.removeCategoryFromList(this.categories, id);
+      },
+      (error) => console.error('Erreur lors de la suppression de la catégorie', error)
+    );
+  }
+}
+
+private removeCategoryFromList(categories: Category[], id: number): void {
+  for (let i = 0; i < categories.length; i++) {
+    if (categories[i].id === id) {
+      categories.splice(i, 1); // Supprime la catégorie si elle correspond à l'ID
+      return;
+    } else if (categories[i].children) {
+      // Appel récursif pour supprimer dans les enfants
+      this.removeCategoryFromList(categories[i].children!, id);
     }
   }
+}
 
   cancelEdit(): void {
     this.editCategory = null; // Annule l'édition
