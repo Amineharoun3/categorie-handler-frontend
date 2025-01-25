@@ -1,83 +1,136 @@
+
+<div>
+<form (ngSubmit)="applyFilters()" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <label for="name" class="form-label">Nom</label>
+    <input type="text" id="name" class="form-control" [(ngModel)]="name" name="name">
+  </div>
+
+  <div class="col-md-3">
+    <label for="isRoot" class="form-label">Racine uniquement</label>
+    <select id="isRoot" class="form-select" [(ngModel)]="isRoot" name="isRoot">
+      <option [ngValue]="null">Tous</option>
+      <option [ngValue]="true">Oui</option>
+      <option [ngValue]="false">Non</option>
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label for="afterDate" class="form-label">Après le</label>
+    <input type="date" id="afterDate" class="form-control" [(ngModel)]="afterDate" name="afterDate">
+  </div>
+
+  <div class="col-md-3">
+    <label for="beforeDate" class="form-label">Avant le</label>
+    <input type="date" id="beforeDate" class="form-control" [(ngModel)]="beforeDate" name="beforeDate">
+  </div>
+
+  <div class="col-md-3">
+    <button type="submit" class="btn btn-primary mt-4">Appliquer les filtres</button>
+  </div>
+</form>
+</div>
+
+
 <div class="container mt-4">
-  <h2>Liste des Catégories</h2>
-  <ul class="list-group">
-    <!-- Boucle sur les catégories racines -->
-    <ng-container *ngFor="let category of getRootCategories()">
-      <li class="list-group-item">
-        <div class="d-flex justify-content-between align-items-center">
-          <!-- Affichage du nom de la catégorie ou champ de saisie -->
-          <span *ngIf="editCategory?.id !== category.id">{{ category.name }}</span>
-          <input 
-            *ngIf="editCategory?.id === category.id" 
-            [(ngModel)]="editCategory!.name" 
-            class="form-control me-3" 
-            placeholder="Modifier le nom" />
+  <h2 class="mb-4">Liste des Catégories</h2>
 
-          <!-- Sélecteur pour changer la catégorie parent -->
-          <select 
-            *ngIf="editCategory?.id === category.id" 
-            [(ngModel)]="editCategory!.parentCategory" 
-            class="form-control mt-2">
-            <option [ngValue]="null">Aucune</option>
-            <option *ngFor="let category of categories" [ngValue]="category">
-              {{ category.name }}
-            </option>
-          </select>
+  <!-- Tableau Bootstrap -->
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th>Nom</th>
+          <th>Date de Création</th>
+          <th>Catégorie Parent</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Vérification si les catégories existent -->
+        <ng-container *ngIf="categories.length > 0; else noCategories">
+          <!-- Catégories principales -->
+          <ng-container *ngFor="let category of getRootCategories()">
+            <tr>
+              <td>
+                <!-- Affichage ou champ de saisie -->
+                <span *ngIf="editCategory?.id !== category.id">{{ category.name }}</span>
+                <input 
+                  *ngIf="editCategory?.id === category.id" 
+                  [(ngModel)]="editCategory!.name" 
+                  class="form-control" 
+                  placeholder="Modifier le nom" />
+              </td>
+              <td>{{ category.createdDate | date: 'shortDate' }}</td>
+              <td>
+                <span *ngIf="editCategory?.id !== category.id" class="badge bg-secondary">
+                  {{ category.parentCategory?.name || 'Racine' }}
+                </span>
+                <select 
+                  *ngIf="editCategory?.id === category.id" 
+                  [(ngModel)]="editCategory!.parentCategory" 
+                  class="form-control">
+                  <option [ngValue]="null">Aucune</option>
+                  <option *ngFor="let parent of categories" [ngValue]="parent">
+                    {{ parent.name }}
+                  </option>
+                </select>
+              </td>
+              <td>
+                <!-- Actions -->
+                <app-update-button-component 
+                  [isEditing]="editCategory?.id === category.id"
+                  (edit)="startEdit(category)"
+                  (save)="updateCategory()"
+                  (cancel)="cancelEdit()">
+                </app-update-button-component>
 
-          <div>
-            <!-- Composant UpdateButton -->
-            <app-update-button-component 
-              [isEditing]="editCategory?.id === category.id"
-              (edit)="startEdit(category)"
-              (save)="updateCategory()"
-              (cancel)="cancelEdit()">
-            </app-update-button-component>
+                <app-delete-button-component 
+                  [categoryId]="category.id || 0"
+                  (delete)="deleteCategory($event)">
+                </app-delete-button-component>
+              </td>
+            </tr>
 
-            <!-- Composant DeleteButton -->
-            <app-delete-button-component 
-              [categoryId]="category.id || 0"
-              (delete)="deleteCategory($event)">
-            </app-delete-button-component>
-          </div>
-        </div>
+            <!-- Sous-catégories -->
+            <ng-container *ngTemplateOutlet="recursiveTableRow; context: { $implicit: category.children, level: 1 }"></ng-container>
+          </ng-container>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
 
-        <!-- Afficher les enfants -->
-        <ul class="list-group mt-2">
-          <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: category.children }"></ng-container>
-        </ul>
-      </li>
-    </ng-container>
-  </ul>
-
-  <!-- Message si aucune catégorie disponible -->
-  <p *ngIf="categories.length === 0" class="alert alert-info mt-4">Aucune catégorie disponible.</p>
-
-  <!-- Template récursif pour gérer les sous-catégories -->
-  <ng-template #recursiveList let-children>
-    <ng-container *ngFor="let child of children">
-      <li class="list-group-item ms-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <!-- Affichage du nom de la sous-catégorie ou champ de saisie -->
-          <span *ngIf="editCategory?.id !== child.id">{{ child.name }}</span>
-          <input 
-            *ngIf="editCategory && editCategory.id === child.id" 
-            [(ngModel)]="editCategory.name" 
-            class="form-control me-3" 
-            placeholder="Modifier le nom" />
-
-          <!-- Sélecteur pour changer la catégorie parent -->
-          <select 
-            *ngIf="editCategory?.id === child.id" 
-            [(ngModel)]="editCategory!.parentCategory" 
-            class="form-control mt-2">
-            <option [ngValue]="null">Aucune</option>
-            <option *ngFor="let category of categories" [ngValue]="category">
-              {{ category.name }}
-            </option>
-          </select>
-
-          <div>
-            <!-- Composant UpdateButton -->
+  <!-- Template récursif pour sous-catégories -->
+  <ng-template #recursiveTableRow let-children let-level="level">
+    <ng-container *ngIf="children?.length > 0">
+      <ng-container *ngFor="let child of children">
+        <tr>
+          <td>
+            <span [style.marginLeft.px]="level * 20" *ngIf="editCategory?.id !== child.id">
+              <i class="bi bi-arrow-return-right"></i>
+              {{ child.name }}
+            </span>
+            <input 
+              *ngIf="editCategory?.id === child.id" 
+              [(ngModel)]="editCategory!.name" 
+              class="form-control" 
+              placeholder="Modifier le nom" />
+          </td>
+          <td>{{ child.createdDate | date: 'shortDate' }}</td>
+          <td>
+            <span *ngIf="editCategory?.id !== child.id">{{ child.parentCategory?.name || 'Enfant' }}</span>
+            <select 
+              *ngIf="editCategory?.id === child.id" 
+              [(ngModel)]="editCategory!.parentCategory" 
+              class="form-control">
+              <option [ngValue]="null">Aucune</option>
+              <option *ngFor="let parent of categories" [ngValue]="parent">
+                {{ parent.name }}
+              </option>
+            </select>
+          </td>
+          <td>
+            <!-- Actions -->
             <app-update-button-component 
               [isEditing]="editCategory?.id === child.id"
               (edit)="startEdit(child)"
@@ -85,22 +138,40 @@
               (cancel)="cancelEdit()">
             </app-update-button-component>
 
-            <!-- Composant DeleteButton -->
             <app-delete-button-component 
               [categoryId]="child.id || 0"
               (delete)="deleteCategory($event)">
             </app-delete-button-component>
-          </div>
-        </div>
+          </td>
+        </tr>
 
-        <!-- Appel récursif pour les sous-enfants -->
-        <ul class="list-group mt-2">
-          <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: child.children }"></ng-container>
-        </ul>
-      </li>
+        <!-- Appel récursif pour sous-enfants -->
+        <ng-container *ngTemplateOutlet="recursiveTableRow; context: { $implicit: child.children, level: level + 1 }"></ng-container>
+      </ng-container>
     </ng-container>
-    
+  </ng-template>
+
+  <!-- Message si aucune catégorie disponible -->
+  <ng-template #noCategories>
+    <p class="alert alert-info mt-4">Aucune catégorie disponible.</p>
   </ng-template>
 </div>
-<app-category-pagination></app-category-pagination>
-<app-category-filter></app-category-filter>
+
+<nav aria-label="Page navigation example" *ngIf="totalPages > 1">
+  <ul class="pagination">
+    <!-- Bouton Précédent -->
+    <li class="page-item" [class.disabled]="currentPage === 1">
+      <a class="page-link" href="#" (click)="changePage(currentPage - 1)">Previous</a>
+    </li>
+
+    <!-- Numéros de pages -->
+    <li *ngFor="let page of [].constructor(totalPages); let i = index" class="page-item" [class.active]="currentPage === i + 1">
+      <a class="page-link" href="#" (click)="changePage(i + 1)">{{ i + 1 }}</a>
+    </li>
+
+    <!-- Bouton Suivant -->
+    <li class="page-item" [class.disabled]="currentPage === totalPages">
+      <a class="page-link" href="#" (click)="changePage(currentPage + 1)">Next</a>
+    </li>
+  </ul>
+</nav>

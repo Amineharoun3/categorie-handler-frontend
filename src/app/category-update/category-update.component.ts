@@ -26,8 +26,7 @@ export class CategoryUpdateComponent implements OnInit {
         (data: Category) => {
             this.category = data;
         },
-        (error) => console.error('Erreur lors du chargement de la catégorie', error)
-    );
+        (error) => console.error('Erreur lors du chargement de la catégorie', error) );
 }
 
 

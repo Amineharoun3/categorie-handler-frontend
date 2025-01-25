@@ -10,6 +10,8 @@ import { DeleteButtonComponentComponent } from './delete-button-component/delete
 import { UpdateButtonComponentComponent } from './update-button-component/update-button-component.component';
 import { CategoryPaginationComponent } from './category-pagination/category-pagination.component';
 import { CategoryFilterComponent } from './category-filter/category-filter.component';
+import { CategoryDetailsComponent } from './components/category-details/category-details.component';
+
 
 
 @NgModule({
@@ -21,6 +23,7 @@ import { CategoryFilterComponent } from './category-filter/category-filter.compo
     UpdateButtonComponentComponent,
     CategoryPaginationComponent,
     CategoryFilterComponent,
+	CategoryDetailsComponent,
  
   ],
   imports: [

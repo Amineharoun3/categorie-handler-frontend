@@ -1,0 +1,22 @@
+<div class="container mt-4" *ngIf="!loading; else loadingTemplate">
+  <h2>Détails de la Catégorie</h2>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ category.name }}</h5>
+      <p class="card-text"><strong>Date de Création :</strong> {{ category.createdDate | date: 'shortDate' }}</p>
+      <p class="card-text">
+        <strong>Catégorie Parent :</strong>
+        {{ category.parentCategory?.name || 'Racine' }}
+      </p>
+      <p class="card-text">
+        <strong>Description :</strong> (ajoutez une description ici si disponible)
+      </p>
+      <a class="btn btn-primary" routerLink="/">Retour à la liste</a>
+    </div>
+  </div>
+</div>
+
+<!-- Indicateur de chargement -->
+<ng-template #loadingTemplate>
+  <p class="text-center mt-4">Chargement des informations de la catégorie...</p>
+</ng-template>
